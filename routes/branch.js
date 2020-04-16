@@ -32,10 +32,10 @@ router.post('/branch', function( req, res, next ) {
       global.branches.push(branch);
       return res.status(201).json(branch);
     } else {
-      return res.status(401).json({err: 'Already registered. bsns_rgnmb : ' + bsns_rgnmb } );
+      return res.status(400).json({err: 'Already registered. bsns_rgnmb : ' + bsns_rgnmb } );
     }
   } else {
-    return res.status(401).json({err: 'Incorrect bsns_rgnmb'});
+    return res.status(400).json({err: 'Incorrect bsns_rgnmb'});
   }
 });
 module.exports = router;
