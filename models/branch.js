@@ -3,7 +3,7 @@ module.exports = ( sequelize, DataTypes ) => {
     bsns_rgnmb : {
       type: DataTypes.STRING(10),
       allowNull: false,
-      unique; true,
+      unique: true,
     },
     nm : {
       type: DataTypes.STRING(30),

@@ -1,52 +1,43 @@
 var express = require('express');
 var router = express.Router();
+var util = require('../util');
 
-// Bikeda branch index page Branch API Document
+// 바이크다 지점 API Document
 router.get('/', function( req, res, next ) {
   res.render('branch', { title: '바이크다 지점 API' });
 });
 
-// Bikeda branch login
-router.get('/branch-login/:bsns_rgnmb/:password', function( req, res, next ) {
-  var branches = global.branches;
-  var bsns_rgnmb = req.params.bsns_rgnmb;
-  var password = req.params.password;
-  if( branches.filter( branch => branch.bsns_rgnmb == bsns_rgnmb ).length < 1 ) {
-    return res.status(400).json({err: '등록되지 않은 지점 사업자 등록 번호. bsns_rgnmb : ' + bsns_rgnmb } );
-  }
-  res.render('branch', { title: '바이크다 지점 API' });
-});
 
-// Bikeda select Branch list
-router.get('/branches', function( req, res, next ) {
+// 바이크다 지점 목록
+router.get('/branches', util.isLoggedin, function( req, res, next ) {
   var branches = global.branches;
   return res.json( branches );
 });
 
-// Bikeda select Branch
-router.get('/branch/:bsns_rgnmb', function( req, res, next ) {
+// 바이크다 지점 조회
+router.get('/branch/:brcofcBsnsRgnmb', util.isLoggedin, function( req, res, next ) {
   var branches = global.branches;
-  var bsns_rgnmb = req.params.bsns_rgnmb;
-  var branch = branches.filter( branch => branch.bsns_rgnmb == bsns_rgnmb );
+  var brcofcBsnsRgnmb = req.params.brcofcBsnsRgnmb;
+  var branch = branches.filter( branch => branch.brcofcBsnsRgnmb == brcofcBsnsRgnmb );
   return res.json( branch );
 });
 
-// Bikeda insert branch
-router.post('/branch', function( req, res, next ) {
+// 바이크다 지점 등록
+router.post('/branch', util.isLoggedin, function( req, res, next ) {
   var branches = global.branches;
-  var bsns_rgnmb = req.body.bsns_rgnmb || '';
-  if( bsns_rgnmb.length ){
-    if( branches.filter( branch => branch.bsns_rgnmb == bsns_rgnmb ).length < 1 ) {
+  var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb || '';
+  if( brcofcBsnsRgnmb.length ){
+    if( branches.filter( branch => branch.brcofcBsnsRgnmb == brcofcBsnsRgnmb ).length < 1 ) {
       var branch = {
-        bsns_rgnmb:bsns_rgnmb
+        brcofcBsnsRgnmb:brcofcBsnsRgnmb
       };
       global.branches.push(branch);
       return res.status(201).json(branch);
     } else {
-      return res.status(400).json({err: '이미 등록된 지점 사업자 등록 번호. bsns_rgnmb : ' + bsns_rgnmb } );
+      return res.status(400).json({err: '이미 등록된 지점 사업자 등록 번호. brcofcBsnsRgnmb : ' + brcofcBsnsRgnmb } );
     }
   } else {
-    return res.status(400).json({err: '사업자 등록 번호 미입력. bsns_rgnmb'});
+    return res.status(400).json({err: '사업자 등록 번호 미입력. brcofcBsnsRgnmb'});
   }
 });
 
