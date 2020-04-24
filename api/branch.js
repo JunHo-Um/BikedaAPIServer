@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var util = require('../util');
+var models = require('../models');
 
 // 바이크다 지점 API Document
 router.get('/', function( req, res, next ) {
@@ -10,8 +11,15 @@ router.get('/', function( req, res, next ) {
 
 // 바이크다 지점 목록
 router.get('/branches', util.isLoggedin, function( req, res, next ) {
-  var branches = global.branches;
-  return res.json( branches );
+  // Bikeda select Branch list
+  models.Branch.findAll().then( result => {
+    console.log( result );
+    return res.json( result );
+  }).catch( err => {
+    return res.json( err );
+  });
+  // var branches = global.branches;
+  // return res.json( branches );
 });
 
 // 바이크다 지점 조회

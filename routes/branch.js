@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var db = require('../models/branch');
 
 // Bikeda branch index page Branch API Document
 router.get('/', function( req, res, next ) {
@@ -19,8 +20,13 @@ router.get('/branch-login/:bsns_rgnmb/:password', function( req, res, next ) {
 
 // Bikeda select Branch list
 router.get('/branches', function( req, res, next ) {
-  var branches = global.branches;
-  return res.json( branches );
+  db.findAll().then( result => {
+    return res.json( result );
+  }).catch( err => {
+    return res.json( err );
+  });
+  // var branches = global.branches;
+  // return res.json( branches );
 });
 
 // Bikeda select Branch

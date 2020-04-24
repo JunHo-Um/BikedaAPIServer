@@ -13,6 +13,6 @@ const sequelize = new Sequelize(
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.Person = require('./branch')(sequelize, Sequelize);
+db.Branch = require('./branch')(sequelize, Sequelize);
 
 module.exports = db;

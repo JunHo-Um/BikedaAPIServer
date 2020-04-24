@@ -12,7 +12,11 @@ var sequelize = require('./models/index').sequelize;
 var app = express();
 global.branches = new Array();
 // global.branches = [{bsns_rgnmb:'6058129193'},{bsns_rgnmb:'6058129194'}];
-sequelize.sync();
+sequelize.sync().then( () => {
+  console.log( "MySql Connect.");
+}).catch( err => {
+  console.log( err );
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
