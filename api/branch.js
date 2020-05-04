@@ -10,7 +10,7 @@ router.get('/', function( req, res, next ) {
 
 // 바이크다 지점 전체 목록
 router.get('/branches', util.isLoggedin, function( req, res, next ) {
-  models.tb_branch_office.findAll().then( result => {
+  models.branch_office.findAll().then( result => {
     return res.status(200).json( result );
   }).catch( err => {
     return res.status(400).json( err );
@@ -25,7 +25,7 @@ router.get('/branch', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   if( Object.keys( query ).length > 0 ) {
-    models.tb_branch_office.findAll( { where: query } ).then( result => {
+    models.branch_office.findAll( { where: query } ).then( result => {
       return res.status(200).json( result );
     }).catch( err => {
       return res.status(400).json( err );

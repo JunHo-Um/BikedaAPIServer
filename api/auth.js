@@ -61,13 +61,14 @@ router.post('/branch', function( req, res, next ){
   function( req, res, next ){
     var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb  || '';
     var brcofcPassword  = req.body.brcofcPassword   || '';
-
-    models.tb_branch_office.findOne({
+    console.log(brcofcPassword);
+    models.branch_office.findOne({
       where : {
         brcofcBsnsRgnmb : brcofcBsnsRgnmb,
         brcofcPassword : brcofcPassword
       }
     }).then( result => {
+      console.log( 'result' + result );
       var payload = {
         brcofcBsnsRgnmb : result.brcofcBsnsRgnmb
       };
