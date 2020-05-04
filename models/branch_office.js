@@ -1,9 +1,14 @@
 module.exports = ( sequelize, DataTypes ) => {
   return sequelize.define( 'tb_branch_office', {
-    brcofcBsnsRgnmb : {
-      type: DataTypes.STRING(10),
+    brcofcId : {
+      type: DataTypes.STRING(5),
       allowNull: false,
       primaryKey : true,
+      comment : "지점 ID"
+    },
+    brcofcBsnsRgnmb : {
+      type: DataTypes.STRING(10),
+      allowNull: true,
       comment : "지점 사업자 등록 번호"
     },
     brcofcPassword :{

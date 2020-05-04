@@ -9,10 +9,11 @@ var branchApi = require('./api/branch');
 
 var sequelize = require('./models/index').sequelize;
 
+require('dotenv').config();
+
 var app = express();
-global.branches = new Array();
-// global.branches = [{bsns_rgnmb:'6058129193'},{bsns_rgnmb:'6058129194'}];
-sequelize.sync().then( () => {
+
+sequelize.sync( {force: false} ).then( () => {
   console.log( "MySql Connect.");
 }).catch( err => {
   console.log( err );
@@ -20,7 +21,7 @@ sequelize.sync().then( () => {
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(cookieParser());

@@ -13,6 +13,6 @@ const sequelize = new Sequelize(
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.Branch = require('./branch')(sequelize, Sequelize);
+db.branch_office = require('./branch_office')(sequelize, Sequelize);
 
 module.exports = db;
