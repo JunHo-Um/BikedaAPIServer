@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var util = require('../util');
 var models = require('../models');
-var schema = require('validate');
+var sequelize = require("sequelize");
+var Op = sequelize.Op;
 
 
 // 바이크다 지점 API Document
@@ -19,37 +20,25 @@ router.get('/branches', util.isLoggedin, function( req, res, next ) {
   });
 });
 
-// 바이크다 지점 조회 ( 지점 ID )
-router.get('/branch/:brcofcId', util.isLoggedin, function( req, res, next ) {
-  models.branch_office.findByPk( req.params.brcofcId ).then( result => {
-      return res.status(200).json( util.successTrue( result ) );
-  }).catch( err => {
-    return res.status(400).json( util.successFalse( err ) );
-  });
-});
-
-// 바이크다 지점 조회
+// 바이크다 지점 조회( 사업자 등록번호, 지점명, 상호, 대표자명)
 router.get('/branch', util.isLoggedin, function( req, res, next ) {
-  var query = req.query || '';
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  var keys = Object.keys( query );
-  if( keys.length > 0 ) {
-    for( var key in keys ) {
+  var reqParam = req.query || '';
+  var brcofcBsnsRgnmb = reqParam.brcofcBsnsRgnmb || '';
+  var brcofcNm        = reqParam.brcofcNm || '';
+  var brcofcMtlty     = reqParam.brcofcMtlty || '';
+  var brcofcRprsntvNm = reqParam.brcofcRprsntvNm || '';
 
-      console.log( query[keys[key]] );
-    }
-    models.branch_office.findAll( { where: query } ).then( result => {
-      return res.status(200).json( util.successTrue( result ) );
-    }).catch( err => {
-      return res.status(400).json( util.successFalse( err ) );
-    });
-  } else {
-    validationError.errors.search = {message:'조회 조건 미입력!'};
-    return res.status(400).json(util.successFalse(validationError));
-  }
+  var query = 'select * from tb_branch_offices where 1=1 ';
+  if( brcofcBsnsRgnmb ) query += 'and brcofcBsnsRgnmb like "%' + brcofcBsnsRgnmb + '%" ';
+  if( brcofcNm )        query += 'and brcofcNm like "%' + brcofcNm + '%" ';
+  if( brcofcMtlty )     query += 'and brcofcMtlty like "%' + brcofcMtlty + '%" ';
+  if( brcofcRprsntvNm ) query += 'and brcofcRprsntvNm like "%' + brcofcRprsntvNm + '%" ';
+
+  models.sequelize.query( query ).spread( function ( result, metadata ) {
+    return res.status(200).json( util.successTrue( result ) );
+  }, function ( err ) {
+    return res.status(400).json( util.successFalse( err ) );
+  })
 });
 
 // 바이크다 지점 등록

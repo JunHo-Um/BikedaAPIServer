@@ -8,9 +8,6 @@ var authApi = require('./api/auth');
 var branchApi = require('./api/branch');
 
 var sequelize = require('./models/index').sequelize;
-
-require('dotenv').config();
-
 var app = express();
 
 sequelize.sync( {force: false} ).then( () => {

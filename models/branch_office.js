@@ -8,12 +8,12 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcBsnsRgnmb : {
       type: DataTypes.STRING(10),
-      allowNull: true,
+      allowNull: false,
       comment : "지점 사업자 등록 번호"
     },
     brcofcPassword :{
       type: DataTypes.STRING(255),
-      allowNull: true,
+      allowNull: false,
       comment : "지점 비밀번호"
     },
     brcofcNm : {
@@ -38,12 +38,12 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcBrdYmd : {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 생년월일"
     },
     brcofcCrprtRgnmb : {
       type: DataTypes.STRING(13),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 법인 등록 번호"
     },
     brcofcOpnngYmd : {
@@ -58,7 +58,7 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcHdofcAdres : {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 본점 주소"
     },
     brcofcBizcnd : {
@@ -73,17 +73,17 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcTelno : {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 연락처"
     },
     brcofcCelno : {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 핸드폰"
     },
     brcofcVrtlAcnt : {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 가상 계좌"
     },
     brcofcFeeSeCd : {

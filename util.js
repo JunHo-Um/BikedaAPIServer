@@ -1,5 +1,6 @@
 var jwt = require('jsonwebtoken');
-
+var sequelize = require("sequelize");
+var Op = sequelize.Op;
 var util = {};
 
 util.successTrue = function(data){
