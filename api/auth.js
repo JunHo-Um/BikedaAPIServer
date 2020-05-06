@@ -48,39 +48,45 @@ router.post('/branch', function( req, res, next ){
   if( brcofcBsnsRgnmb.length < 1 ){
     isValid = false;
     validationError.errors.brcofcBsnsRgnmb = {message:'사업자 등록 번호 미입력!'};
-  };
+  }
 
   if( brcofcPassword.length < 1 ){
     isValid = false;
     validationError.errors.brcofcPassword = {message:'비밀번호 미입력!'};
-  };
+  }
 
   if(!isValid) return res.status(400).json(util.successFalse(validationError));
   else next();
   },
   function( req, res, next ){
+    var validationError = {
+      name:'ValidationError',
+      errors:{}
+    };
+
     var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb  || '';
     var brcofcPassword  = req.body.brcofcPassword   || '';
-    console.log(brcofcPassword);
     models.branch_office.findOne({
       where : {
         brcofcBsnsRgnmb : brcofcBsnsRgnmb,
         brcofcPassword : brcofcPassword
       }
     }).then( result => {
-      console.log( 'result' + result );
+      if( !result ){
+        validationError.errors.notfound = {message:'존재 하지 않는 사업자 번호 또는 비밀번호 오류'};
+        return res.status(400).json(util.successFalse(validationError));
+      }
       var payload = {
         brcofcBsnsRgnmb : result.brcofcBsnsRgnmb
       };
       var secretOrPrivateKey = process.env.JWT_SECRET;
-      console.log(secretOrPrivateKey);
       var options = {expiresIn: 60*60*24};
       jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
         if(err) return res.status(400).json(util.successFalse(err));
         res.status(200).json(util.successTrue(token));
       });
     }).catch( err => {
-      return res.status(400).json( err );
+      return res.status(400).json(util.successFalse(err));
     });
 
   }

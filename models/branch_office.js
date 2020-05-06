@@ -13,7 +13,7 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcPassword :{
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
       comment : "지점 비밀번호"
     },
     brcofcNm : {
@@ -93,13 +93,13 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     brcofcFeeAmnt : {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0,
       comment : "지점 수수료 금액"
     },
     brcofcFeeRate : {
       type: DataTypes.DECIMAL(5,2),
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0,
       comment : "지점 수수료 율"
     }

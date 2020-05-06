@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var util = require('../util');
 var models = require('../models');
+var schema = require('validate');
+
 
 // 바이크다 지점 API Document
 router.get('/', function( req, res, next ) {
@@ -11,9 +13,18 @@ router.get('/', function( req, res, next ) {
 // 바이크다 지점 전체 목록
 router.get('/branches', util.isLoggedin, function( req, res, next ) {
   models.branch_office.findAll().then( result => {
-    return res.status(200).json( result );
+    return res.status(200).json( util.successTrue( result ) );
   }).catch( err => {
-    return res.status(400).json( err );
+    return res.status(400).json( util.successFalse( err ) );
+  });
+});
+
+// 바이크다 지점 조회 ( 지점 ID )
+router.get('/branch/:brcofcId', util.isLoggedin, function( req, res, next ) {
+  models.branch_office.findByPk( req.params.brcofcId ).then( result => {
+      return res.status(200).json( util.successTrue( result ) );
+  }).catch( err => {
+    return res.status(400).json( util.successFalse( err ) );
   });
 });
 
@@ -24,11 +35,16 @@ router.get('/branch', util.isLoggedin, function( req, res, next ) {
     name:'ValidationError',
     errors:{}
   };
-  if( Object.keys( query ).length > 0 ) {
+  var keys = Object.keys( query );
+  if( keys.length > 0 ) {
+    for( var key in keys ) {
+
+      console.log( query[keys[key]] );
+    }
     models.branch_office.findAll( { where: query } ).then( result => {
-      return res.status(200).json( result );
+      return res.status(200).json( util.successTrue( result ) );
     }).catch( err => {
-      return res.status(400).json( err );
+      return res.status(400).json( util.successFalse( err ) );
     });
   } else {
     validationError.errors.search = {message:'조회 조건 미입력!'};
@@ -38,6 +54,11 @@ router.get('/branch', util.isLoggedin, function( req, res, next ) {
 
 // 바이크다 지점 등록
 router.post('/branch', util.isLoggedin, function( req, res, next ) {
+  var validationError = {
+    name:'ValidationError',
+    errors:{}
+  };
+
   var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb || '';
   if( brcofcBsnsRgnmb.length > 0 ){
     if( branches.filter( branch => branch.brcofcBsnsRgnmb == brcofcBsnsRgnmb ).length < 1 ) {
