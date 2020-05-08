@@ -1,9 +1,11 @@
 {
   "name": "bikedaapiserver",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "바이트다 API 서버",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
