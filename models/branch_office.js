@@ -102,6 +102,11 @@ module.exports = ( sequelize, DataTypes ) => {
       allowNull: true,
       defaultValue: 0,
       comment : "지점 수수료 율"
+    },
+    brcofcStateCd : {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      comment : "지점 상태 코드"
     }
   },
   {

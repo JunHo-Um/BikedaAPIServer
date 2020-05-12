@@ -74,10 +74,19 @@ var create = new Schema({
   'brcofcFeeRate' : { match : /^(\d{1,2})([.]\d{0,2}?)?$/, required : false,
     message : {
       match : "수수료 율을 100보다 작은 소수점 2자리까지 입력하여 주십시오."
-    } }
+    } },
+  'brcofcStateCd' : { type : String, required : true, enum:['01','02'],
+    message : {
+      required : "상태 구분 코드는 필수 입력입니다.",
+      enum : "상태 구분을 선택하여 주십시오."
+    } },
 });
 
 var update = new Schema({
+  'brcofcId' : { type : String, required : true, length : 5 ,
+    message : {
+      length : "지점 ID는 5자리 입니다."
+    } },
   'brcofcBsnsRgnmb' : { type : String, required : true, length : 10,
     message : {
       required : "사업자 등록 번호는 필수 입니다.",
@@ -132,7 +141,11 @@ var update = new Schema({
   'brcofcFeeRate' : { match : /^(\d{1,2})([.]\d{0,2}?)?$/, required : false,
     message : {
       match : "수수료 율을 100보다 작은 소수점 2자리까지 입력하여 주십시오."
-    } }
+    } },
+  'brcofcStateCd' : { type : String, required : false, enum:['01','02'],
+    message : {
+      enum : "상태 구분을 선택하여 주십시오."
+    } },
 });
 schema.create = create;
 schema.update = update;

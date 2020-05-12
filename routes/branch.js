@@ -47,9 +47,8 @@ router.post('/branch', util.isLoggedin, function( req, res, next ) {
     name:'ValidationError',
     errors:{}
   };
-
   //입력 값 검증
-  var validErrors = schema.create.validate(req.body);
+  var validErrors = schema.create.validate( req.body );
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -57,50 +56,64 @@ router.post('/branch', util.isLoggedin, function( req, res, next ) {
     }
     return res.status(400).json( util.successFalse( validationError) );
   }
+
+  var data = req.body;
   // 지점 등록 여부 검증
-  models.branch_office.findOne( { where : { brcofcBsnsRgnmb: req.body.brcofcBsnsRgnmb } } ).then( result => {
+  models.branch_office.findOne( { where : { brcofcBsnsRgnmb: data.brcofcBsnsRgnmb } } ).then( result => {
     if( result ) {
       validationError.errors.already = {message:'이미 등록된 지점 사업자 등록 번호. brcofcBsnsRgnmb : ' + brcofcBsnsRgnmb };
       return res.status(400).json( util.successFalse( validationError) );
     }
     // 지점 ID 생성
-    var query = "select concat('B', lpad(concat(max(cast(substr(brcofcId, 2) AS unsigned))+ 1),4,'0') ) as brcofcId from tb_branch_offices";
+    var query = "select cast( concat('B', lpad(concat(max(cast(substr(brcofcId, 2) AS unsigned))+ 1),4,'0') ) as char) as brcofcId from tb_branch_offices";
     var brcofcId = '';
     models.sequelize.query( query ).spread( function ( result, metadata ) {
-      brcofcId = result.brcofcId;
+      data.brcofcId = result[0].brcofcId;
+      models.branch_office.create( data ).then( result => {
+        return res.status(201).json( util.successTrue( result ) );
+      }).catch( err => {
+        return res.status(400).json( util.successFalse( err ) );
+      });
     }, function ( err ) {
       return res.status(400).json( util.successFalse( err ) );
     });
   }).catch( err => {
     return res.status(400).json( util.successFalse( err ) );
   });
-
-
-  return res.status(201).json( util.successTrue( ) );
-  // models.branch_office.create({
-  //   brcofcId : brcofcId,
-  //   brcofcBsnsRgnmb : brcofcBsnsRgnmb,
-  //   brcofcPassword : brcofcPassword,
-  //   brcofcNm : brcofcNm,
-  //   brcofcMtlty : brcofcMtlty,
-  //   brcofcBizSeCd : brcofcBizSeCd,
-  //   brcofcRprsntvNm : brcofcRprsntvNm,
-  //   brcofcBrdYmd : brcofcBrdYmd,
-  //   brcofcCrprtRgnmb : brcofcCrprtRgnmb,
-  //   brcofcOpnngYmd : brcofcOpnngYmd,
-  //   brcofcBsnsPlaceAdres : brcofcBsnsPlaceAdres,
-  //   brcofcHdofcAdres : brcofcHdofcAdres,
-  //   brcofcBizcnd : brcofcBizcnd,
-  //   brcofcInduty : brcofcInduty,
-  //   brcofcTelno : brcofcTelno,
-  //   brcofcCelno : brcofcCelno,
-  //   brcofcVrtlAcnt : brcofcVrtlAcnt,
-  //   brcofcFeeSeCd : brcofcFeeSeCd,
-  //   brcofcFeeAmnt : brcofcFeeAmnt,
-  //   brcofcFeeRate : brcofcFeeRate,
-  //
-  // });
 });
 
+// 바이크다 지점 수정
+router.put('/branch', util.isLoggedin, function( req, res, next ) {
+  var validationError = {
+    name:'ValidationError',
+    errors:{}
+  };
+  //입력 값 검증
+  var validErrors = schema.update.validate(req.body);
+  if( validErrors.length > 0 ){
+    for( var error in validErrors ){
+      var validError = validErrors[error];
+      validationError.errors[validError.path] = {message: validError.message };
+    }
+    return res.status(400).json( util.successFalse( validationError) );
+  }
 
+  var data = req.body;
+  delete data.brcofcId;
+  // 지점 등록 여부 검증
+  models.branch_office.findOne( { where : { brcofcId: req.body.brcofcId } } ).then( result => {
+    if( !result ) {
+      validationError.errors.notfound = { message:'존재하지 않는 지점 ID. brcofcId : ' + brcofcId };
+      return res.status(400).json( util.successFalse( validationError) );
+    }
+    models.branch_office.update( data, { where : { brcofcId: req.body.brcofcId } } ).then( result => {
+      return res.status(201).json( util.successTrue( result ) );
+    }).catch( err => {
+      return res.status(400).json( util.successFalse( err ) );
+    });
+
+  }).catch( err => {
+    return res.status(400).json( util.successFalse( err ) );
+  });
+});
 module.exports = router;
