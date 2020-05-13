@@ -4,7 +4,9 @@ var util = require('../util');
 var models = require('../models');
 var sequelize = require("sequelize");
 var Op = sequelize.Op;
-var schema = require('../validate/branch');
+var office_valid = require('../validate/branch_office');
+var point_valid = require('../validate/branch_point');
+
 
 // 바이크다 지점 API Document
 router.get('/', function( req, res, next ) {
@@ -48,7 +50,7 @@ router.post('/branch', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   //입력 값 검증
-  var validErrors = schema.create.validate( req.body );
+  var validErrors = office_valid.create.validate( req.body );
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -89,7 +91,7 @@ router.put('/branch', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   //입력 값 검증
-  var validErrors = schema.update.validate(req.body);
+  var validErrors = office_valid.update.validate(req.body);
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -112,6 +114,53 @@ router.put('/branch', util.isLoggedin, function( req, res, next ) {
       return res.status(400).json( util.successFalse( err ) );
     });
 
+  }).catch( err => {
+    return res.status(400).json( util.successFalse( err ) );
+  });
+});
+
+// 바이크다 지점 포인트 조회( 지점 ID, 포인트 구분 코드 )
+router.get('/branch-point', util.isLoggedin, function( req, res, next ) {
+  var validationError = {
+    name:'ValidationError',
+    errors:{}
+  };
+  var reqParam = req.query || '';
+  var brcofcId      = reqParam.brcofcId || '';
+  var pointSeCd     = reqParam.pointSeCd || '';
+
+  if( !brcofcId ) {
+    validationError.errors.notfound = { message:'지점 ID는 필수 입니다.' };
+    return res.status(400).json( util.successFalse( validationError) );
+  }
+  var where = {}
+  where.brcofcId = brcofcId;
+  if( pointSeCd ) where.pointSeCd = pointSeCd;
+  models.branch_point.findAll( { where : where } ).then( result => {
+    return res.status(200).json( util.successTrue( result ) );
+  }).catch( err => {
+    return res.status(400).json( util.successFalse( err ) );
+  });
+});
+// 바이크다 지점 포인트 등록
+router.post('/branch-point', util.isLoggedin, function( req, res, next ) {
+  var validationError = {
+    name:'ValidationError',
+    errors:{}
+  };
+
+  //입력 값 검증
+  var validErrors = point_valid.create.validate(req.body);
+  if( validErrors.length > 0 ){
+    for( var error in validErrors ){
+      var validError = validErrors[error];
+      validationError.errors[validError.path] = {message: validError.message };
+    }
+    return res.status(400).json( util.successFalse( validationError) );
+  }
+
+  models.branch_point.create( req.body ).then( result => {
+    return res.status(200).json( util.successTrue( result ) );
   }).catch( err => {
     return res.status(400).json( util.successFalse( err ) );
   });

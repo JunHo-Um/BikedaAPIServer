@@ -14,5 +14,6 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.branch_office = require('./branch_office')(sequelize, Sequelize);
+db.branch_point = require('./branch_point')(sequelize, Sequelize);
 
 module.exports = db;
