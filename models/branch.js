@@ -1,5 +1,5 @@
 module.exports = ( sequelize, DataTypes ) => {
-  return sequelize.define( 'tb_branch_office', {
+  return sequelize.define( 'tb_branch', {
     brcofcId : {
       type: DataTypes.STRING(5),
       allowNull: false,

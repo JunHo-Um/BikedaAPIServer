@@ -13,9 +13,9 @@ module.exports = ( sequelize, DataTypes ) => {
       comment : "지점 ID"
     },
     shareDelayTime : {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(6),
       allowNull: false,
-      defaultValue: 0,
+      defaultValue: '000000',
       comment : "공유 지연 시간"
     }
   },

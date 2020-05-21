@@ -31,7 +31,8 @@ module.exports = ( sequelize, DataTypes ) => {
     },
     srchrApplyYn : {
       type: DataTypes.STRING(1),
-      allowNull: true,
+      allowNull: false,
+      defaultValue: 'N',
       comment : "할증 적용 여부"
     }
   },

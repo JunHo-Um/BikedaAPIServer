@@ -24,6 +24,12 @@ module.exports = ( sequelize, DataTypes ) => {
       defaultValue: 0,
       comment : "포인트 금액"
     },
+    pointRegDt: {
+      type: DataTypes.Date,
+      allowNull: false,
+      defaultValue : sequelize.NOW(),
+      comment : "포인트 등록 일시"
+    },
     pointNote : {
       type: DataTypes.STRING(1000),
       allowNull: true,

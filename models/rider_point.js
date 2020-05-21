@@ -1,5 +1,5 @@
 module.exports = ( sequelize, DataTypes ) => {
-  return sequelize.define( 'tb_store_point', {
+  return sequelize.define( 'tb_rider_point', {
     pointSeqNo : {
       type: DataTypes.BIGINT,
       allowNull: false,
@@ -7,11 +7,11 @@ module.exports = ( sequelize, DataTypes ) => {
       autoIncrement: true,
       comment : "포인트 일련번호"
     },
-    stoId : {
-      type: DataTypes.STRING(5),
+    riderId : {
+      type: DataTypes.STRING(6),
       allowNull: false,
       primaryKey : true,
-      comment : "상점 ID"
+      comment : "라이더 ID"
     },
     pointSeCd : {
       type: DataTypes.STRING(10),

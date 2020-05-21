@@ -94,6 +94,7 @@ module.exports = ( sequelize, DataTypes ) => {
     stoNightSrchrApplyYn : {
       type: DataTypes.STRING(1),
       allowNull: false,
+      defaultValue: 'N',
       comment : "상점 야간 할증 적용 여부"
     },
     stoNightSrchrStdTm : {

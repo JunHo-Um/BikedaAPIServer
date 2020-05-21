@@ -4,7 +4,7 @@ var util = require('../util');
 var models = require('../models');
 var sequelize = require("sequelize");
 var Op = sequelize.Op;
-var office_valid = require('../validate/branch_office');
+var office_valid = require('../validate/branch');
 var point_valid = require('../validate/branch_point');
 var share_valid = require('../validate/branch_share');
 
@@ -16,7 +16,7 @@ router.get('/', function( req, res, next ) {
 
 // 바이크다 지점 전체 목록
 router.get('/branches', util.isLoggedin, function( req, res, next ) {
-  models.branch_office.findAll().then( result => {
+  models.branch.findAll().then( result => {
     return res.status(200).json( util.successTrue( result ) );
   }).catch( err => {
     return res.status(400).json( util.successFalse( err ) );
@@ -31,7 +31,7 @@ router.get('/branch', util.isLoggedin, function( req, res, next ) {
   var brcofcMtlty     = reqParam.brcofcMtlty || '';
   var brcofcRprsntvNm = reqParam.brcofcRprsntvNm || '';
 
-  var query = 'select * from tb_branch_offices where 1=1 ';
+  var query = 'select * from tb_branchs where 1=1 ';
   if( brcofcBsnsRgnmb ) query += 'and brcofcBsnsRgnmb like "%' + brcofcBsnsRgnmb + '%" ';
   if( brcofcNm )        query += 'and brcofcNm like "%' + brcofcNm + '%" ';
   if( brcofcMtlty )     query += 'and brcofcMtlty like "%' + brcofcMtlty + '%" ';
@@ -62,17 +62,17 @@ router.post('/branch', util.isLoggedin, function( req, res, next ) {
 
   var data = req.body;
   // 지점 등록 여부 검증
-  models.branch_office.findOne( { where : { brcofcBsnsRgnmb: data.brcofcBsnsRgnmb } } ).then( result => {
+  models.branch.findOne( { where : { brcofcBsnsRgnmb: data.brcofcBsnsRgnmb } } ).then( result => {
     if( result ) {
       validationError.errors.already = {message:'이미 등록된 지점 사업자 등록 번호. brcofcBsnsRgnmb : ' + brcofcBsnsRgnmb };
       return res.status(400).json( util.successFalse( validationError) );
     }
     // 지점 ID 생성
-    var query = "select cast( concat('B', lpad(concat(max(cast(substr(brcofcId, 2) AS unsigned))+ 1),4,'0') ) as char) as brcofcId from tb_branch_offices";
+    var query = "select cast( concat('B', lpad(concat(max(cast(substr(brcofcId, 2) AS unsigned))+ 1),4,'0') ) as char) as brcofcId from tb_branchs";
     var brcofcId = '';
     models.sequelize.query( query ).spread( function ( result, metadata ) {
       data.brcofcId = result[0].brcofcId;
-      models.branch_office.create( data ).then( result => {
+      models.branch.create( data ).then( result => {
         return res.status(201).json( util.successTrue( result ) );
       }).catch( err => {
         return res.status(400).json( util.successFalse( err ) );
@@ -104,12 +104,12 @@ router.put('/branch', util.isLoggedin, function( req, res, next ) {
   var data = req.body;
   delete data.brcofcId;
   // 지점 등록 여부 검증
-  models.branch_office.findOne( { where : { brcofcId: req.body.brcofcId } } ).then( result => {
+  models.branch.findOne( { where : { brcofcId: req.body.brcofcId } } ).then( result => {
     if( !result ) {
       validationError.errors.notfound = { message:'존재하지 않는 지점 ID. brcofcId : ' + brcofcId };
       return res.status(400).json( util.successFalse( validationError) );
     }
-    models.branch_office.update( data, { where : { brcofcId: req.body.brcofcId } } ).then( result => {
+    models.branch.update( data, { where : { brcofcId: req.body.brcofcId } } ).then( result => {
       return res.status(201).json( util.successTrue( result ) );
     }).catch( err => {
       return res.status(400).json( util.successFalse( err ) );
