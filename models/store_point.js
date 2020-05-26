@@ -25,9 +25,9 @@ module.exports = ( sequelize, DataTypes ) => {
       comment : "포인트 금액"
     },
     pointRegDt: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false,
-      defaultValue : sequelize.NOW(),
+      defaultValue : DataTypes.NOW,
       comment : "포인트 등록 일시"
     },
     pointNote : {

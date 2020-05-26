@@ -62,23 +62,23 @@ module.exports = ( sequelize, DataTypes ) => {
       comment : "주문 픽업 요청 시간"
     },
     ordRecvDt: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: true,
-      defaultValue : sequelize.NOW(),
+      defaultValue : DataTypes.NOW,
       comment : "주문 접수 일시"
     },
     ordDsptcDt: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false,
       comment : "주문 배차 일시"
     },
     ordPickDt: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false,
       comment : "주문 픽업 일시"
     },
     ordDlvrTcDt: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false,
       comment : "주문 배달 일시"
     },
