@@ -261,4 +261,40 @@ router.put('/branch-share', util.isLoggedin, function( req, res, next ) {
     return res.status(400).json( util.successFalse( err ) );
   });
 });
+
+// 바이크다 지점 공유 삭제
+router.delete('/branch-share', util.isLoggedin, function ( req, res, next ) {
+  var validationError = {
+    name:'ValidationError',
+    errors:{}
+  };
+  //입력 값 검증
+  var validErrors = share_valid.update.validate(req.body);
+  if( validErrors.length > 0 ){
+    for( var error in validErrors ){
+      var validError = validErrors[error];
+      validationError.errors[validError.path] = {message: validError.message };
+    }
+    return res.status(400).json( util.successFalse( validationError) );
+  }
+  var data = req.body;
+  delete data.shareDelayTime;
+
+  models.branch_share.findAll( { where : data } ).then( result => {
+    if( !result ) {
+      validationError.errors.already = {message:'지점 공유 정보가 등록 되어있지 않습니다.' };
+      return res.status(400).json( util.successFalse( validationError) );
+    }
+    delete req.body.shareId;
+    delete req.body.brcofcId;
+
+    models.branch_share.destroy( { where : data } ).then( result => {
+      return res.status(200).json( util.successTrue( result ) );
+    }).catch( err => {
+      return res.status(400).json( util.successFalse( err ) );
+    });
+  }).catch( err => {
+    return res.status(400).json( util.successFalse( err ) );
+  });
+});
 module.exports = router;
