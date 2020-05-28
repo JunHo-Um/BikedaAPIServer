@@ -4,10 +4,7 @@ var util = require('../util');
 var models = require('../models');
 var sequelize = require("sequelize");
 var Op = sequelize.Op;
-var office_valid = require('../validate/branch');
-var point_valid = require('../validate/branch_point');
-var share_valid = require('../validate/branch_share');
-
+var { check, validationResult } = require('express-validator');
 
 // 바이크다 지점 API Document
 router.get('/', function( req, res, next ) {
@@ -45,13 +42,28 @@ router.get('/branch', util.isLoggedin, function( req, res, next ) {
 });
 
 // 바이크다 지점 등록
-router.post('/branch', util.isLoggedin, function( req, res, next ) {
+router.post('/branch', util.isLoggedin, [
+  check('brcofcBsnsRgnmb').exists().bail().notEmpty().bail().isNumeric().bail().isLength({ min: 10, max: 10 }),
+  check('brcofcPassword').exists().bail().notEmpty(),
+  check('brcofcNm').exists().bail().notEmpty(),
+  check('brcofcMtlty').exists().bail().notEmpty(),
+  check('brcofcBizSeCd').exists().bail().notEmpty().bail().isIn(['01','02']),
+  check('brcofcRprsntvNm').exists().bail().notEmpty(),
+  check('brcofcBrdYmd').if(check('brcofcBizSeCd').isIn(['01'])).exists().bail().notEmpty().bail().isNumeric().bail().isLength({min:8, max:8}).bail().matches(/^(19|20)\d{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/),
+  check('brcofcCrprtRgnmb').if(check('brcofcBizSeCd').isIn(['02'])).exists().bail().notEmpty().bail().isNumeric().bail().isLength({min:13, max:13}),
+  check('brcofcOpnngYmd').exists().bail().notEmpty().isNumeric().bail().isLength({min:8, max:8}).bail().matches(/^(19|20)\d{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/),
+  check('brcofcBsnsPlaceAdres').exists().bail().notEmpty(),
+  check('brcofcBizcnd').exists().bail().notEmpty(),
+  check('brcofcInduty').exists().bail().notEmpty(),
+  check('brcofcCelno').exists().bail().notEmpty().isNumeric(),
+
+],function( req, res, next ) {
   var validationError = {
     name:'ValidationError',
     errors:{}
   };
   //입력 값 검증
-  var validErrors = office_valid.create.validate( req.body );
+  var validErrors = branch_valid.create.validate( req.body );
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -68,7 +80,7 @@ router.post('/branch', util.isLoggedin, function( req, res, next ) {
       return res.status(400).json( util.successFalse( validationError) );
     }
     // 지점 ID 생성
-    var query = "select cast( concat('B', lpad(concat(max(cast(substr(brcofcId, 2) AS unsigned))+ 1),4,'0') ) as char) as brcofcId from tb_branchs";
+    var query = "select cast( concat('B', lpad( concat( ifnull( max( cast( substr( brcofcId, 2 ) AS unsigned ) ) , 0 ) + 1 ), 4, '0' ) ) as char ) as brcofcId from tb_branchs";
     var brcofcId = '';
     models.sequelize.query( query ).spread( function ( result, metadata ) {
       data.brcofcId = result[0].brcofcId;
@@ -92,7 +104,7 @@ router.put('/branch', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   //입력 값 검증
-  var validErrors = office_valid.update.validate(req.body);
+  var validErrors = branch_valid.update.validate(req.body);
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];

@@ -80,33 +80,33 @@ var create = new Schema({
     message : {
       match : "야간 할증 금액(원 단위)으로 입력하여 주십시오."
     } },
-  'stoLa' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : false,
+  'stoLa' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : true,
     message : {
+      required : "위도는 필수 입력입니다.",
       match : "위도는 정수3자리 소수점20자리 이하로 입력 하여주십시오."
     } },
-  'stoLo' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : false,
+  'stoLo' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : true,
     message : {
+      required : "경도는 필수 입력입니다.",
       match : "경도는 정수3자리 소수점20자리 이하로 입력 하여주십시오."
     } },
 });
 
 var update = new Schema({
-  'stoId' : { type : String, required : true, length : 5 ,
+  'stoId' : { type : String, required : true, length : 5,
     message : {
+      required : "지점 ID는 필수 입니다.",
       length : "지점 ID는 5자리 입니다."
     } },
-  'stoBsnsRgnmb' : { type : String, required : true, length : 10,
+  'stoBsnsRgnmb' : { type : String, required : false, length : 10,
     message : {
-      required : "사업자 등록 번호는 필수 입니다.",
       length : "사업자 등록 번호는 10자리 입니다."
     } },
   'stoPassword' : { type : String, required : false,
   },
-  'stoNm' : { type : String, required : false,
-  },
   'stoMtlty' : { type : String, required : false,
   },
-  'stoBizSeCd' : { type : String, required : false, enum : ['01','02'],
+  'stoBizSeCd' : { type : String, required : false, enum:['01','02'],
     message : {
       enum : "사업자 구분을 선택하여 주십시오."
     } },
@@ -138,21 +138,33 @@ var update = new Schema({
   },
   'stoVrtlAcnt' : { type : String, required : false
   },
-  'stoFeeSeCd' : { type : String, required : false, enum:['01','02'],
+  'stoSetSeCd' : { type : String, required : false, enum:['01','02'],
     message : {
-      enum : "수수료 구분을 선택하여 주십시오."
+      enum : "설정 구분을 선택하여 주십시오."
     } },
-  'stoFeeAmnt' : { match : /^[0-9]$/, required : false,
+  'stoNightSrchrApplyYn' : { type : String, required : false, enum:['Y','N'],
     message : {
-      match : "수수료 금액(원 단위)으로 입력하여 주십시오."
+      enum : "야간 할증 여부를 선택하여 주십시오."
     } },
-  'stoFeeRate' : { match : /^(\d{1,2})([.]\d{0,2}?)?$/, required : false,
+  'stoNightSrchrStdTm' : { match : /^[0-2][0-3][0-5][0-9][0-5][0-9]$/, required : false,
     message : {
-      match : "수수료 율을 100보다 작은 소수점 2자리까지 입력하여 주십시오."
+      match : "야간 할증 시작 시간은 (000000 ~ 235959)로 입력 하여 주십시오.
     } },
-  'stoStateCd' : { type : String, required : false, enum:['01','02'],
+  'stoNightSrchrEndTm' : { match : /^[0-2][0-3][0-5][0-9][0-5][0-9]$/, required : false,
     message : {
-      enum : "상태 구분을 선택하여 주십시오."
+      match : "야간 할증 종료 시간은 (000000 ~ 235959)로 입력 하여 주십시오.
+    } },
+  'stoNightSrchrAmnt' : { match : /^[0-9]$/, required : false,
+    message : {
+      match : "야간 할증 금액(원 단위)으로 입력하여 주십시오."
+    } },
+  'stoLa' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : false,
+    message : {
+      match : "위도는 정수3자리 소수점20자리 이하로 입력 하여주십시오."
+    } },
+  'stoLo' : { match : /^(\d{1,3})([.]\d{0,20}?)?$/, required : false,
+    message : {
+      match : "경도는 정수3자리 소수점20자리 이하로 입력 하여주십시오."
     } },
 });
 schema.create = create;

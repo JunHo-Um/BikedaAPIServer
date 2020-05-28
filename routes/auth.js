@@ -3,116 +3,69 @@ var router = express.Router();
 var util = require('../util');
 var jwt = require('jsonwebtoken');
 var models = require('../models');
+var { check, validationResult } = require('express-validator');
 
 // 관리자 로그 인증 및 토큰생성
-router.post('/admin', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
+router.post('/admin', [
+  check('brcofcBrdYmd').if(check('brcofcBizSeCd').isIn(['01'])).exists().bail().notEmpty().bail().isNumeric().bail().isLength({min:8, max:8}).bail().matches(/^(19|20)\d{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/),
+  check('adminId').exists().bail().notEmpty(),
+  check('adminPassword').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+  var payload = {
+    id : req.body.adminId
   };
-  if(!req.body.adminId){
-    isValid = false;
-    validationError.errors.adminId = {message:'아이디 미입력!'};
-  }
-  if(!req.body.adminPassword){
-    isValid = false;
-    validationError.errors.adminPassword = {message:'비밀번호 미입력!'};
-  }
-  if(!isValid) return res.json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
-    var payload = {
-      id : req.body.adminId
-    };
-    var secretOrPrivateKey = process.env.JWT_SECRET;
-    var options = {expiresIn: 60*60*24};
-    jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
-      if(err) return res.status(400).json(util.successFalse(err));
-      res.status(200).json(util.successTrue(token));
-    });
-  }
-);
+  var secretOrPrivateKey = process.env.JWT_SECRET;
+  var options = {expiresIn: 60*60*24};
+  jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
+    if(err) return res.status(400).json(util.successFalse(err));
+    res.status(200).json(util.successTrue(token));
+  })
+});
 
 // 지점 로그인 인증 및 토큰 생성
-router.post('/branch', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb  || '';
-  var brcofcPassword  = req.body.brcofcPassword   || '';
+router.post('/branch', [
+  check('brcofcBsnsRgnmb').exists().bail().notEmpty(),
+  check('brcofcPassword').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
 
-  if( brcofcBsnsRgnmb.length < 1 ){
-    isValid = false;
-    validationError.errors.brcofcBsnsRgnmb = {message:'사업자 등록 번호 미입력!'};
-  }
-
-  if( brcofcPassword.length < 1 ){
-    isValid = false;
-    validationError.errors.brcofcPassword = {message:'비밀번호 미입력!'};
-  }
-
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req, res, next ){
-    var validationError = {
-      name:'ValidationError',
-      errors:{}
+  models.branch.findOne( { where : { brcofcBsnsRgnmb : req.body.brcofcBsnsRgnmb, brcofcPassword : req.body.brcofcPassword } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 사업자 번호 또는 비밀번호 오류' };
+      return res.status(400).json(util.successFalse(errors));
+    }
+    var payload = {
+      brcofcBsnsRgnmb : result.brcofcBsnsRgnmb
     };
-
-    var brcofcBsnsRgnmb = req.body.brcofcBsnsRgnmb  || '';
-    var brcofcPassword  = req.body.brcofcPassword   || '';
-    models.branch_office.findOne({
-      where : {
-        brcofcBsnsRgnmb : brcofcBsnsRgnmb,
-        brcofcPassword : brcofcPassword
-      }
-    }).then( result => {
-      if( !result ){
-        validationError.errors.notfound = {message:'존재 하지 않는 사업자 번호 또는 비밀번호 오류'};
-        return res.status(400).json(util.successFalse(validationError));
-      }
-      var payload = {
-        brcofcBsnsRgnmb : result.brcofcBsnsRgnmb
-      };
-      var secretOrPrivateKey = process.env.JWT_SECRET;
-      var options = {expiresIn: 60*60*24};
-      jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
-        if(err) return res.status(400).json(util.successFalse(err));
-        res.status(200).json(util.successTrue(token));
-      });
-    }).catch( err => {
-      return res.status(400).json(util.successFalse(err));
+    var secretOrPrivateKey = process.env.JWT_SECRET;
+    var options = {expiresIn: 60*60*24};
+    jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
+      if(err) return res.status(400).json(util.successFalse(err));
+      res.status(200).json(util.successTrue(token));
     });
-
-  }
-);
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
 
 // 상점 로그인 인증 및 토큰 생성
-router.post('/store', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  if(!req.body.stoBsnsRgnmb){
-    isValid = false;
-    validationError.errors.stoBsnsRgnmb = {message:'사업자 등록 번호 미입력!'};
-  }
-  if(!req.body.stoPassword){
-    isValid = false;
-    validationError.errors.stoPassword = {message:'비밀번호 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
+router.post('/store', [
+  check('stoBsnsRgnmb').exists().bail().notEmpty(),
+  check('stoPassword').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+
+  models.store.findOne( { where : { stoBsnsRgnmb : req.body.stoBsnsRgnmb, stoPassword : req.body.stoPassword } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 사업자 번호 또는 비밀번호 오류' };
+      return res.status(400).json(util.successFalse(errors));
+    }
     var payload = {
-      stoBsnsRgnmb : req.body.stoBsnsRgnmb
+      stoBsnsRgnmb : result.stoBsnsRgnmb
     };
     var secretOrPrivateKey = process.env.JWT_SECRET;
     var options = {expiresIn: 60*60*24};
@@ -120,26 +73,26 @@ router.post('/store', function( req, res, next ){
       if(err) return res.status(400).json(util.successFalse(err));
       res.status(200).json(util.successTrue(token));
     });
-  }
-);
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
+
 
 // 랴이더 로그인 인증 및 토큰 생성
-router.post('/rider', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  if(!req.body.riderCelno){
-    isValid = false;
-    validationError.errors.riderCelno = {message:'휴대폰 번호 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
+router.post('/rider', [
+  check('riderCelno').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+
+  models.rider.findOne( { where : { riderCelno : req.body.riderCelno } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 라이더 정보' };
+      return res.status(400).json(util.successFalse(errors));
+    }
     var payload = {
-      riderCelno : req.body.riderCelno
+      riderCelno : result.riderCelno
     };
     var secretOrPrivateKey = process.env.JWT_SECRET;
     var options = {expiresIn: 60*60*24};
@@ -147,118 +100,103 @@ router.post('/rider', function( req, res, next ){
       if(err) return res.status(400).json(util.successFalse(err));
       res.status(200).json(util.successTrue(token));
     });
-  }
-);
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
 
 // 관리자 인증 토큰 재생성
-router.post('/refresh-admin', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
+router.post('/re-admin', [
+  check('adminId').exists().bail().notEmpty(),
+  check('adminPassword').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+  var payload = {
+    id : req.body.adminId
   };
-  if(!req.body.adminId){
-    isValid = false;
-    validationError.errors.adminId = {message:'아이디 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
-    var payload = {
-      adminId : req.body.adminId
-    };
-    var secretOrPrivateKey = process.env.JWT_SECRET;
-    // var options = {expiresIn: 60*60*24};
-    var options = {expiresIn: 60};
-    jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
-      if(err) return res.status(400).json(util.successFalse(err));
-      res.status(200).json(util.successTrue(token));
-    });
-  }
-);
+  var secretOrPrivateKey = process.env.JWT_SECRET;
+  var options = {expiresIn: 60*60*24};
+  jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
+    if(err) return res.status(400).json(util.successFalse(err));
+    res.status(200).json(util.successTrue(token));
+  })
+});
 
 // 지점 인증 토큰 재생성
-router.post('/refresh-branch', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  if(!req.body.brcofcBsnsRgnmb){
-    isValid = false;
-    validationError.errors.brcofcBsnsRgnmb = {message:'사업자 등록 번호 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
+router.post('/re-branch', [
+  check('brcofcBsnsRgnmb').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+
+  models.branch.findOne( { where : { brcofcBsnsRgnmb : req.body.brcofcBsnsRgnmb } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 사업자 번호' };
+      return res.status(400).json(util.successFalse(errors));
+    }
     var payload = {
-      brcofcBsnsRgnmb : req.body.brcofcBsnsRgnmb
+      brcofcBsnsRgnmb : result.brcofcBsnsRgnmb
     };
     var secretOrPrivateKey = process.env.JWT_SECRET;
-    // var options = {expiresIn: 60*60*24};
-    var options = {expiresIn: 60};
+    var options = {expiresIn: 60*60*24};
     jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
       if(err) return res.status(400).json(util.successFalse(err));
       res.status(200).json(util.successTrue(token));
     });
-  }
-);
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
 
 // 상점 인증 토큰 재생성
-router.post('/refresh-store', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  if(!req.body.stoBsnsRgnmb){
-    isValid = false;
-    validationError.errors.stoBsnsRgnmb = {message:'사업자 등록 번호 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
-    var payload = {
-      stoBsnsRgnmb : req.body.stoBsnsRgnmb
-    };
-    var secretOrPrivateKey = process.env.JWT_SECRET;
-    // var options = {expiresIn: 60*60*24};
-    var options = {expiresIn: 60};
-    jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
-      if(err) return res.status(400).json(util.successFalse(err));
-      res.status(200).json(util.successTrue(token));
-    });
-  }
-);
+router.post('/re-store', [
+  check('stoBsnsRgnmb').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
 
-// 라이더 인증 토큰 재생성
-router.post('/refresh-rider', function( req, res, next ){
-  var isValid = true;
-  var validationError = {
-    name:'ValidationError',
-    errors:{}
-  };
-  if(!req.body.riderCelno){
-    isValid = false;
-    validationError.errors.riderCelno = {message:'휴대폰 번호 미입력!'};
-  }
-  if(!isValid) return res.status(400).json(util.successFalse(validationError));
-  else next();
-  },
-  function( req,res,next ){
+  models.store.findOne( { where : { stoBsnsRgnmb : req.body.stoBsnsRgnmb } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 사업자 번호' };
+      return res.status(400).json(util.successFalse(errors));
+    }
     var payload = {
-      riderCelno : req.body.riderCelno
+      stoBsnsRgnmb : result.stoBsnsRgnmb
     };
     var secretOrPrivateKey = process.env.JWT_SECRET;
-    // var options = {expiresIn: 60*60*24};
-    var options = {expiresIn: 60};
+    var options = {expiresIn: 60*60*24};
     jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
       if(err) return res.status(400).json(util.successFalse(err));
       res.status(200).json(util.successTrue(token));
     });
-  }
-);
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
+// 라이더 인증 토큰 재생성
+router.post('/re-rider', [
+  check('riderCelno').exists().bail().notEmpty()
+], function( req, res, next ){
+  var errors = validationResult(req);
+  if( !errors.isEmpty() ) return res.json(util.successFalse(errors));
+
+  models.rider.findOne( { where : { riderCelno : req.body.riderCelno } } ).then( result => {
+    if( !result ){
+      var errors = { msg: '존재 하지 않는 라이더 정보' };
+      return res.status(400).json(util.successFalse(errors));
+    }
+    var payload = {
+      riderCelno : result.riderCelno
+    };
+    var secretOrPrivateKey = process.env.JWT_SECRET;
+    var options = {expiresIn: 60*60*24};
+    jwt.sign(payload, secretOrPrivateKey, options, function(err, token){
+      if(err) return res.status(400).json(util.successFalse(err));
+      res.status(200).json(util.successTrue(token));
+    });
+  }).catch( err => {
+    return res.status(400).json(util.successFalse(err));
+  });
+});
 module.exports = router;

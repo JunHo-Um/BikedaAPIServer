@@ -85,11 +85,11 @@ var create = new Schema({
 var update = new Schema({
   'brcofcId' : { type : String, required : true, length : 5 ,
     message : {
+      required : "지점 ID는 필수 입니다.",
       length : "지점 ID는 5자리 입니다."
     } },
-  'brcofcBsnsRgnmb' : { type : String, required : true, length : 10,
+  'brcofcBsnsRgnmb' : { type : String, required : false, length : 10,
     message : {
-      required : "사업자 등록 번호는 필수 입니다.",
       length : "사업자 등록 번호는 10자리 입니다."
     } },
   'brcofcPassword' : { type : String, required : false,

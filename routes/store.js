@@ -4,7 +4,7 @@ var util = require('../util');
 var models = require('../models');
 var sequelize = require("sequelize");
 var Op = sequelize.Op;
-var office_valid = require('../validate/store');
+var store_valid = require('../validate/store');
 var point_valid = require('../validate/store_point');
 var share_valid = require('../validate/store_share');
 
@@ -51,7 +51,7 @@ router.post('/store', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   //입력 값 검증
-  var validErrors = office_valid.create.validate( req.body );
+  var validErrors = store_valid.create.validate( req.body );
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -68,7 +68,7 @@ router.post('/store', util.isLoggedin, function( req, res, next ) {
       return res.status(400).json( util.successFalse( validationError) );
     }
     // 상점 ID 생성
-    var query = "select cast( concat('S', lpad(concat(max(cast(substr(stoId, 2) AS unsigned))+ 1),4,'0') ) as char) as stoId from tb_stores";
+    var query = "select cast( concat('S', lpad( concat( ifnull( max( cast( substr( stoId, 2 ) AS unsigned ) ) , 0 ) + 1 ), 4, '0' ) ) as char ) as stoId from tb_stores";
     var stoId = '';
     models.sequelize.query( query ).spread( function ( result, metadata ) {
       data.stoId = result[0].stoId;
@@ -92,7 +92,7 @@ router.put('/store', util.isLoggedin, function( req, res, next ) {
     errors:{}
   };
   //입력 값 검증
-  var validErrors = office_valid.update.validate(req.body);
+  var validErrors = store_valid.update.validate(req.body);
   if( validErrors.length > 0 ){
     for( var error in validErrors ){
       var validError = validErrors[error];
@@ -166,4 +166,6 @@ router.post('/store-point', util.isLoggedin, function( req, res, next ) {
     return res.status(400).json( util.successFalse( err ) );
   });
 });
+
+
 module.exports = router;

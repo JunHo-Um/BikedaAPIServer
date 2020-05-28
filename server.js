@@ -14,6 +14,8 @@ var debug = require('debug')('bikedaapiserver:server');
 var http = require('http');
 require('dotenv').config();
 
+
+
 sequelize.sync( {force: false} ).then( () => {
  console.log( "MySql Connect.");
 }).catch( err => {
