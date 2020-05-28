@@ -56,7 +56,10 @@ router.post('/branch', util.isLoggedin, [
   check('brcofcBizcnd').exists().bail().notEmpty(),
   check('brcofcInduty').exists().bail().notEmpty(),
   check('brcofcCelno').exists().bail().notEmpty().isNumeric(),
-
+  check('brcofcFeeSeCd').exists().bail().notEmpty().bail().isIn(['01','02']),
+  check('brcofcFeeAmnt').if(check('brcofcFeeSeCd').isIn(['01'])).exists().bail().notEmpty().bail().isNumeric(),
+  check('brcofcFeeRate').if(check('brcofcFeeSeCd').isIn(['02'])).exists().bail().notEmpty().bail().isNumeric().bail().matches(/^(\d{1,2})([.]\d{0,2}?)?$/),
+  check('brcofcStateCd').exists().bail().notEmpty().bail().isIn(['01','02'])
 ],function( req, res, next ) {
   var validationError = {
     name:'ValidationError',
